@@ -30,7 +30,7 @@
 
     <script src="https://d3js.org/d3.v3.min.js"></script>
     <script>
-        // Load the data and create the bar chart race
+        // Load the data
         d3.csv("vgsales.csv", function(error, data) {
             if (error) {
                 console.log("Error loading data:", error);
@@ -53,72 +53,95 @@
             // Create SVG element
             const svg = d3.select("#barchart-container")
                 .append("svg")
-                .attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom)
+                .attr("viewBox", "0 0 " + width + " " + height)
+                .attr("width", "100%")
+                .attr("height", "auto")
                 .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-            // Extract initial data for the starting year
-            let currentData = data.filter(d => d.Year === currentYear);
+            // Define functions to update different chart components
+            function updateBars(keyframe, transition) {
+                // Update bars
+                const bars = svg.selectAll(".bar")
+                    .data(keyframe, function(d) { return d.Name; });
 
-            // Create scales
-            const x = d3.scale.ordinal()
-                .domain(currentData.map(function(d) { return d.Name; }))
-                .rangeRoundBands([0, width], 0.1);
-            
-            const y = d3.scale.linear()
-                .domain([0, d3.max(currentData, function(d) { return d.Global_Sales; })])
-                .nice()
-                .range([height, 0]);
+                // Enter
+                bars.enter().append("rect")
+                    .attr("class", "bar")
+                    .attr("x", function(d) { return x(d.Name); })
+                    .attr("y", height)
+                    .attr("width", x.rangeBand())
+                    .attr("height", 0)
+                    .merge(bars)
+                    .transition(transition)
+                    .attr("y", function(d) { return y(d.Global_Sales); })
+                    .attr("height", function(d) { return height - y(d.Global_Sales); });
 
-
-            // Create initial bars
-            const bars = svg.selectAll(".bar")
-                .data(currentData)
-                .enter()
-                .append("rect")
-                .attr("class", "bar")
-                .attr("x", d => x(d.Name))
-                .attr("y", d => y(d.Global_Sales))
-                .attr("width", x.rangeBand())
-                .attr("height", d => height - y(d.Global_Sales));
-
-            // Add labels to the bars
-            bars.append("text")
-                .attr("x", d => x(d.Name) + x.rangeBand() / 2)
-                .attr("y", d => y(d.Global_Sales) - 5)
-                .attr("text-anchor", "middle")
-                .text(d => d.Global_Sales);
-
-            // Function to update the chart for the next year
-            function updateChart() {
-                currentYear++; // Move to the next year
-                currentData = data.filter(d => d.Year === currentYear); // Filter data for the current year
-
-                // Update scales
-                x.domain(currentData.map(d => d.Name));
-                y.domain([0, d3.max(currentData, d => d.Global_Sales)]);
-
-                // Update bars with transition
-                bars.data(currentData)
-                    .transition()
-                    .duration(duration)
-                    .attr("x", d => x(d.Name))
-                    .attr("y", d => y(d.Global_Sales))
-                    .attr("height", d => height - y(d.Global_Sales));
-
-                // Update labels with transition
-                svg.selectAll(".bar text")
-                    .data(currentData)
-                    .transition()
-                    .duration(duration)
-                    .attr("x", d => x(d.Name) + x.rangeBand() / 2)
-                    .attr("y", d => y(d.Global_Sales) - 5)
-                    .text(d => d.Global_Sales);
+                // Exit
+                bars.exit().remove();
             }
 
-            // Start the bar chart race
-            setInterval(updateChart, duration + 100); // Repeat every duration + 100ms
+            function updateAxis(keyframe, transition) {
+                // Update x-axis
+                svg.select(".x.axis")
+                    .transition(transition)
+                    .call(xAxis);
+                
+                // Update y-axis
+                svg.select(".y.axis")
+                    .transition(transition)
+                    .call(yAxis);
+            }
+
+            function updateLabels(keyframe, transition) {
+                // Update labels
+                const labels = svg.selectAll(".label")
+                    .data(keyframe, function(d) { return d.Name; });
+
+                // Enter
+                labels.enter().append("text")
+                    .attr("class", "label")
+                    .attr("x", function(d) { return x(d.Name) + x.rangeBand() / 2; })
+                    .attr("y", height)
+                    .attr("dy", "1.2em")
+                    .style("text-anchor", "middle")
+                    .text(function(d) { return d.Global_Sales; })
+                    .merge(labels)
+                    .transition(transition)
+                    .attr("y", function(d) { return y(d.Global_Sales) - 5; });
+                
+                // Exit
+                labels.exit().remove();
+            }
+
+            function updateTicker(keyframe, transition) {
+                // Update ticker
+                svg.select(".ticker")
+                    .text("Year: " + keyframe.Year);
+            }
+
+            // Define chart object
+            const chart = {
+                replay: function() {
+                    // Iterate over keyframes
+                    for (const keyframe of keyframes) {
+                        const transition = svg.transition()
+                            .duration(duration)
+                            .ease("linear");
+
+                        // Update chart components
+                        updateAxis(keyframe, transition);
+                        updateBars(keyframe, transition);
+                        updateLabels(keyframe, transition);
+                        updateTicker(keyframe, transition);
+
+                        await transition.end();
+                    }
+                }
+            };
+
+            // Call replay function to start animation
+            chart.replay();
         });
     </script>
 </body>

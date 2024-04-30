@@ -51,13 +51,15 @@
             });
 
             // Create SVG element
+// Create SVG element
             const svg = d3.select("#barchart-container")
                 .append("svg")
                 .attr("viewBox", "0 0 " + width + " " + height)
                 .attr("width", "100%")
-                .attr("height", "auto")
+                .attr("style", "max-height: " + height + "px")
                 .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
 
             // Define functions to update different chart components
             function updateBars(keyframe, transition) {

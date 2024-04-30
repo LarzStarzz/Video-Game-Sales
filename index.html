@@ -31,11 +31,14 @@
     <script src="https://d3js.org/d3.v3.min.js"></script>
     <script>
         // Load the data (replace this with your actual data loading code)
-        d3.csv("vgsales.csv", function(error, data) {
+        d3.csv("video_game_sales.csv", function(error, data) {
             if (error) {
                 console.log("Error loading data:", error);
                 return;
             }
+
+            // Log the loaded data to verify
+            console.log("Loaded data:", data);
 
             // Convert sales values to numbers
             data.forEach(function(d) {
@@ -53,7 +56,7 @@
             replay(keyframes);
         });
 
-        // Function to generate keyframes
+        // Define function to generate keyframes
         function generateKeyframes(data) {
             const keyframes = [];
             const years = Array.from(new Set(data.map(d => d.Year))); // Get unique years
@@ -149,4 +152,19 @@
                 .attr("x", width - 6)
                 .attr("y", marginTop + barSize * (n - 0.45))
                 .attr("dy", "0.32em")
-                .
+                .text(formatDate(keyframes[0][0]));
+
+            return ([date], transition) => {
+                transition.end().then(() => now.text(formatDate(date)));
+            };
+        }
+
+        // Define color function
+        function color() {
+            const scale = d3.scaleOrdinal(d3.schemeTableau10);
+            return d => scale(d.name);
+        }
+
+        // Define textTween function
+        function textTween(a, b) {
+            const i

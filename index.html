@@ -80,7 +80,7 @@
           .style("display", d => d.depth === 1 ? "inline" : "none")
           .attr("x", d => d.x)
           .attr("y", d => d.y)
-          .text(d => `${d.Platform} - ${d.Year} - ${d.Genre} - ${d.Publisher}`);
+          .text(d => d.name);
 
       // Add transition for zooming
       function zoom(event, pack, d) {

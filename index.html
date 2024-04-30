@@ -20,24 +20,37 @@
 </head>
 <body>
   <script>
-    var diameter = 960,
-        format = d3.format(",d"),
-        color = d3.scale.category20c();
+    // Specify the chart’s dimensions.
+    const width = 928;
+    const height = width;
 
-    var bubble = d3.layout.pack()
-        .sort(null)
-        .size([diameter, diameter])
-        .padding(1.5);
+    // Create the color scale.
+    const color = d3.scaleLinear()
+        .domain([0, 5])
+        .range(["hsl(152,80%,80%)", "hsl(228,30%,40%)"])
+        .interpolate(d3.interpolateHcl);
 
-    var svg = d3.select("body").append("svg")
-        .attr("width", diameter)
-        .attr("height", diameter)
-        .attr("class", "bubble");
+    // Compute the layout.
+    const pack = data => d3.pack()
+        .size([width, height])
+        .padding(3)
+      (d3.hierarchy(data)
+        .sum(d => d.value)
+        .sort((a, b) => b.value - a.value));
 
-    d3.csv("data.csv", function(error, data) {
+    // Create the SVG container.
+    const svg = d3.select("body").append("svg")
+        .attr("viewBox", `-${width / 2} -${height / 2} ${width} ${height}`)
+        .attr("width", width)
+        .attr("height", height)
+        .attr("style", `max-width: 100%; height: auto; display: block; margin: 0 -14px; cursor: pointer;`);
+
+    // Load data from CSV file and create the chart
+    d3.csv("vgsales.csv", function(error, data) {
       if (error) throw error;
 
-      var nestedData = d3.nest()
+      // Structure the data
+      const nestedData = d3.nest()
         .key(function(d) { return d.Platform; })
         .key(function(d) { return d.Year; })
         .key(function(d) { return d.Genre; })
@@ -45,42 +58,60 @@
         .key(function(d) { return "Global Sales"; })
         .entries(data);
 
-      var root = {
+      const root = {
         name: "Video Game Sales",
         children: nestedData
       };
 
-      var node = svg.selectAll(".node")
-          .data(bubble.nodes(classes(root))
-          .filter(function(d) { return !d.children; }))
-        .enter().append("g")
-          .attr("class", "node")
-          .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+      // Compute the pack layout
+      const rootPack = pack(root);
 
-      node.append("circle")
-          .attr("r", function(d) { return d.r; })
-          .style("fill", function(d) { return color(d.packageName); });
+      // Append the nodes.
+      const node = svg.append("g")
+        .selectAll("circle")
+        .data(rootPack.descendants().slice(1))
+        .enter().append("circle")
+          .attr("fill", d => d.children ? color(d.depth) : "white")
+          .attr("r", d => d.r)
+          .attr("cx", d => d.x)
+          .attr("cy", d => d.y)
+          .on("mouseover", function() { d3.select(this).attr("stroke", "#000"); })
+          .on("mouseout", function() { d3.select(this).attr("stroke", null); })
+          .on("click", (event, d) => zoom(event, rootPack, d));
 
-      node.append("text")
-          .attr("dy", ".3em")
-          .style("text-anchor", "middle")
-          .text(function(d) { return d.className.substring(0, d.r / 3); });
+      // Append the text labels.
+      const label = svg.append("g")
+          .style("font", "10px sans-serif")
+          .attr("text-anchor", "middle")
+        .selectAll("text")
+        .data(rootPack.descendants())
+        .enter().append("text")
+          .style("fill-opacity", d => d.parent === rootPack ? 1 : 0)
+          .style("display", d => d.parent === rootPack ? "inline" : "none")
+          .attr("x", d => d.x)
+          .attr("y", d => d.y)
+          .text(d => d.data.name);
     });
 
-    // Returns a flattened hierarchy containing all leaf nodes under the root.
-    function classes(root) {
-      var classes = [];
+    function zoom(event, rootPack, d) {
+      const focus0 = rootPack;
+      const focus1 = d;
 
-      function recurse(name, node) {
-        if (node.children) node.children.forEach(function(child) { recurse(node.name, child); });
-        else classes.push({packageName: name, className: node.name, value: node.size});
+      const transition = svg.transition()
+          .duration(event.altKey ? 7500 : 750)
+          .tween("zoom", d => {
+            const i = d3.interpolateZoom(focus0, [focus1.x, focus1.y, focus1.r * 2]);
+            return t => zoomTo(i(t));
+          });
+
+      function zoomTo(v) {
+        const k = width / v[2];
+
+        node.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
+        label.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
+        node.attr("r", d => d.r * k);
       }
-
-      recurse(null, root);
-      return {children: classes};
     }
-
-    d3.select(self.frameElement).style("height", diameter + "px");
   </script>
 </body>
 </html>

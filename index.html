@@ -49,7 +49,8 @@
             // Define keyframes array
             const keyframes = generateKeyframes(data);
 
-            // Other code omitted for brevity
+            // Call replay function to start animation
+            replay(keyframes);
         });
 
         // Function to generate keyframes
@@ -73,7 +74,7 @@
             return keyframes;
         }
 
-        // Define rank, bars, labels, and ticker functions
+        // Define rank function
         function rank(value) {
             const data = Array.from(names, name => ({ name, value: value(name) }));
             data.sort((a, b) => d3.descending(a.value, b.value));
@@ -81,6 +82,7 @@
             return data;
         }
 
+        // Define bars function
         function bars(svg) {
             let bar = svg.append("g")
                 .attr("fill-opacity", 0.6)
@@ -106,6 +108,7 @@
                     .attr("width", d => x(d.value) - x(0)));
         }
 
+        // Define labels function
         function labels(svg) {
             let label = svg.append("g")
                 .style("font", "bold 12px var(--sans-serif)")
@@ -137,6 +140,7 @@
                     .call(g => g.select("tspan").tween("text", d => textTween((prev.get(d) || d).value, d.value))));
         }
 
+        // Define ticker function
         function ticker(svg) {
             const now = svg.append("text")
                 .style("font", `bold ${barSize}px var(--sans-serif)`)
@@ -145,15 +149,4 @@
                 .attr("x", width - 6)
                 .attr("y", marginTop + barSize * (n - 0.45))
                 .attr("dy", "0.32em")
-                .text(formatDate(keyframes[0][0]));
-
-            return ([date], transition) => {
-                transition.end().then(() => now.text(formatDate(date)));
-            };
-        }
-
-        // Other helper functions (color, textTween, etc.) should be defined here
-
-    </script>
-</body>
-</html>
+                .

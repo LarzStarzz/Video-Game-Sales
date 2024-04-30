@@ -34,23 +34,20 @@
         .attr("height", diameter)
         .attr("class", "bubble");
 
-    d3.csv("vgsales.csv", function(error, data) {
+    d3.csv("data.csv", function(error, data) {
       if (error) throw error;
+
+      var nestedData = d3.nest()
+        .key(function(d) { return d.Platform; })
+        .key(function(d) { return d.Year; })
+        .key(function(d) { return d.Genre; })
+        .key(function(d) { return d.Publisher; })
+        .key(function(d) { return "Global Sales"; })
+        .entries(data);
 
       var root = {
         name: "Video Game Sales",
-        children: data.map(function(d) {
-          return {
-            name: d.Name,
-            children: [
-              { name: "Platform: " + d.Platform, size: +d.PlatformSales },
-              { name: "Year: " + d.Year, size: +d.YearSales },
-              { name: "Genre: " + d.Genre, size: 1 }, // Adjust size if needed
-              { name: "Publisher: " + d.Publisher, size: +d.PublisherSales },
-              { name: "Global Sales", size: +d.Global_Sales }
-            ]
-          };
-        })
+        children: nestedData
       };
 
       var node = svg.selectAll(".node")

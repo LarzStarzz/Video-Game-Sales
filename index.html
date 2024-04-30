@@ -62,10 +62,10 @@
             let currentData = data.filter(d => d.Year === currentYear);
 
             // Create scales
-            const x = d3.scaleBand()
-                .domain(currentData.map(d => d.Name))
-                .range([0, width])
-                .padding(0.1);
+            const x = d3.scale.ordinal()
+                .domain(currentData.map(function(d) { return d.Name; }))
+                .rangeRoundBands([0, width], 0.1);
+
 
             const y = d3.scaleLinear()
                 .domain([0, d3.max(currentData, d => d.Global_Sales)])
@@ -80,12 +80,12 @@
                 .attr("class", "bar")
                 .attr("x", d => x(d.Name))
                 .attr("y", d => y(d.Global_Sales))
-                .attr("width", x.bandwidth())
+                .attr("width", x.rangeBand())
                 .attr("height", d => height - y(d.Global_Sales));
 
             // Add labels to the bars
             bars.append("text")
-                .attr("x", d => x(d.Name) + x.bandwidth() / 2)
+                .attr("x", d => x(d.Name) + x.rangeBand() / 2)
                 .attr("y", d => y(d.Global_Sales) - 5)
                 .attr("text-anchor", "middle")
                 .text(d => d.Global_Sales);
@@ -112,7 +112,7 @@
                     .data(currentData)
                     .transition()
                     .duration(duration)
-                    .attr("x", d => x(d.Name) + x.bandwidth() / 2)
+                    .attr("x", d => x(d.Name) + x.rangeBand() / 2)
                     .attr("y", d => y(d.Global_Sales) - 5)
                     .text(d => d.Global_Sales);
             }

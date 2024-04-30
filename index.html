@@ -1,170 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Game Bar Chart Race</title>
-    <style>
-        /* CSS styles for the bar chart */
-        #barchart-container {
-            width: 800px;
-            margin: 20px auto;
-        }
-        .bar {
-            fill: steelblue;
-        }
-        .bar:hover {
-            fill: orange;
-        }
-        .bar text {
-            font-size: 12px;
-            text-anchor: middle;
-            fill: white;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zoomable Circle Packing</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+  <style>
+    circle {
+      fill: #ccc;
+      stroke: #fff;
+      stroke-width: 1.5px;
+    }
+
+    text {
+      font: 10px sans-serif;
+      pointer-events: none;
+    }
+  </style>
 </head>
 <body>
-    <div id="barchart-container">
-        <!-- Your bar chart race will be generated here -->
-    </div>
+  <script>
+    var diameter = 960,
+        format = d3.format(",d"),
+        color = d3.scale.category20c();
 
-    <script src="https://d3js.org/d3.v3.min.js"></script>
-    <script>
-        // Load the data (replace this with your actual data loading code)
-        d3.csv("vgsales.csv", function(error, data) {
-            if (error) {
-                console.log("Error loading data:", error);
-                return;
-            }
+    var bubble = d3.layout.pack()
+        .sort(null)
+        .size([diameter, diameter])
+        .padding(1.5);
 
-            // Log the loaded data to verify
-            console.log("Loaded data:", data);
+    var svg = d3.select("body").append("svg")
+        .attr("width", diameter)
+        .attr("height", diameter)
+        .attr("class", "bubble");
 
-            // Convert sales values to numbers
-            data.forEach(function(d) {
-                d.Global_Sales = +d.Global_Sales;
-                d.Year = +d.Year;
-            });
+    d3.csv("vgsales.csv", function(error, data) {
+      if (error) throw error;
 
-            // Ensure data is sorted by year
-            data.sort((a, b) => a.Year - b.Year);
+      var root = {
+        name: "Video Game Sales",
+        children: data.map(function(d) {
+          return {
+            name: d.Category,
+            children: [
+              { name: d.Platform, size: +d.PlatformSales },
+              { name: d.Publisher, size: +d.PublisherSales },
+              { name: d.Year, size: +d.YearSales },
+              { name: "Global Sales", size: +d.GlobalSales }
+            ]
+          };
+        })
+      };
 
-            // Define keyframes array
-            const keyframes = generateKeyframes(data);
+      var node = svg.selectAll(".node")
+          .data(bubble.nodes(classes(root))
+          .filter(function(d) { return !d.children; }))
+        .enter().append("g")
+          .attr("class", "node")
+          .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
 
-            // Call replay function to start animation
-            replay(keyframes);
-        });
+      node.append("circle")
+          .attr("r", function(d) { return d.r; })
+          .style("fill", function(d) { return color(d.packageName); });
 
-        // Define function to generate keyframes
-        function generateKeyframes(data) {
-            const keyframes = [];
-            const years = Array.from(new Set(data.map(d => d.Year))); // Get unique years
-            for (let i = 0; i < years.length - 1; i++) {
-                const currentYear = years[i];
-                const nextYear = years[i + 1];
-                const currentData = data.filter(d => d.Year === currentYear);
-                const nextData = data.filter(d => d.Year === nextYear);
-                keyframes.push([
-                    new Date(currentYear, 0), // Start of current year
-                    rank(name => (currentData.find(d => d.Name === name)?.Global_Sales || 0)),
-                ]);
-                keyframes.push([
-                    new Date(nextYear, 0), // Start of next year
-                    rank(name => (nextData.find(d => d.Name === name)?.Global_Sales || 0)),
-                ]);
-            }
-            return keyframes;
-        }
+      node.append("text")
+          .attr("dy", ".3em")
+          .style("text-anchor", "middle")
+          .text(function(d) { return d.className.substring(0, d.r / 3); });
+    });
 
-        // Define rank function
-        function rank(value) {
-            const data = Array.from(names, name => ({ name, value: value(name) }));
-            data.sort((a, b) => d3.descending(a.value, b.value));
-            for (let i = 0; i < data.length; ++i) data[i].rank = Math.min(n, i);
-            return data;
-        }
+    // Returns a flattened hierarchy containing all leaf nodes under the root.
+    function classes(root) {
+      var classes = [];
 
-        // Define bars function
-        function bars(svg) {
-            let bar = svg.append("g")
-                .attr("fill-opacity", 0.6)
-                .selectAll("rect");
+      function recurse(name, node) {
+        if (node.children) node.children.forEach(function(child) { recurse(node.name, child); });
+        else classes.push({packageName: name, className: node.name, value: node.size});
+      }
 
-            return ([date, data], transition) => bar = bar
-                .data(data.slice(0, n), d => d.name)
-                .join(
-                    enter => enter.append("rect")
-                        .attr("class", "bar")
-                        .attr("fill", color)
-                        .attr("height", y.bandwidth())
-                        .attr("x", x(0))
-                        .attr("y", d => y((prev.get(d) || d).rank))
-                        .attr("width", d => x((prev.get(d) || d).value) - x(0)),
-                    update => update,
-                    exit => exit.transition(transition).remove()
-                        .attr("y", d => y((next.get(d) || d).rank))
-                        .attr("width", d => x((next.get(d) || d).value) - x(0))
-                )
-                .call(bar => bar.transition(transition)
-                    .attr("y", d => y(d.rank))
-                    .attr("width", d => x(d.value) - x(0)));
-        }
+      recurse(null, root);
+      return {children: classes};
+    }
 
-        // Define labels function
-        function labels(svg) {
-            let label = svg.append("g")
-                .style("font", "bold 12px var(--sans-serif)")
-                .style("font-variant-numeric", "tabular-nums")
-                .attr("text-anchor", "end")
-                .selectAll("text");
-
-            return ([date, data], transition) => label = label
-                .data(data.slice(0, n), d => d.name)
-                .join(
-                    enter => enter.append("text")
-                        .attr("transform", d => `translate(${x((prev.get(d) || d).value)},${y((prev.get(d) || d).rank)})`)
-                        .attr("y", y.bandwidth() / 2)
-                        .attr("x", -6)
-                        .attr("dy", "-0.25em")
-                        .text(d => d.name)
-                        .call(text => text.append("tspan")
-                            .attr("fill-opacity", 0.7)
-                            .attr("font-weight", "normal")
-                            .attr("x", -6)
-                            .attr("dy", "1.15em")),
-                    update => update,
-                    exit => exit.transition(transition).remove()
-                        .attr("transform", d => `translate(${x((next.get(d) || d).value)},${y((next.get(d) || d).rank)})`)
-                        .call(g => g.select("tspan").tween("text", d => textTween(d.value, (next.get(d) || d).value)))
-                )
-                .call(bar => bar.transition(transition)
-                    .attr("transform", d => `translate(${x(d.value)},${y(d.rank)})`)
-                    .call(g => g.select("tspan").tween("text", d => textTween((prev.get(d) || d).value, d.value))));
-        }
-
-        // Define ticker function
-        function ticker(svg) {
-            const now = svg.append("text")
-                .style("font", `bold ${barSize}px var(--sans-serif)`)
-                .style("font-variant-numeric", "tabular-nums")
-                .attr("text-anchor", "end")
-                .attr("x", width - 6)
-                .attr("y", marginTop + barSize * (n - 0.45))
-                .attr("dy", "0.32em")
-                .text(formatDate(keyframes[0][0]));
-
-            return ([date], transition) => {
-                transition.end().then(() => now.text(formatDate(date)));
-            };
-        }
-
-        // Define color function
-        function color() {
-            const scale = d3.scaleOrdinal(d3.schemeTableau10);
-            return d => scale(d.name);
-        }
-
-        // Define textTween function
-        function textTween(a, b) {
-            const i
+    d3.select(self.frameElement).style("height", diameter + "px");
+  </script>
+</body>
+</html>

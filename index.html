@@ -31,7 +31,7 @@
     <script src="https://d3js.org/d3.v3.min.js"></script>
     <script>
         // Load the data
-        d3.csv("vgsales.csv", function(error, data) {
+        d3.csv("video_game_sales.csv", function(error, data) {
             if (error) {
                 console.log("Error loading data:", error);
                 return;
@@ -123,20 +123,37 @@
             // Define chart object
             const chart = {
                 replay: function() {
-                    // Iterate over keyframes
-                    for (const keyframe of keyframes) {
-                        const transition = svg.transition()
-                            .duration(duration)
-                            .ease("linear");
+                    // Define a function to transition keyframes
+                    function transitionKeyframes(index) {
+                        return new Promise(function(resolve) {
+                            const keyframe = keyframes[index];
+                            const transition = svg.transition()
+                                .duration(duration)
+                                .ease("linear");
 
-                        // Update chart components
-                        updateAxis(keyframe, transition);
-                        updateBars(keyframe, transition);
-                        updateLabels(keyframe, transition);
-                        updateTicker(keyframe, transition);
+                            // Update chart components
+                            updateAxis(keyframe, transition);
+                            updateBars(keyframe, transition);
+                            updateLabels(keyframe, transition);
+                            updateTicker(keyframe, transition);
 
-                        await transition.end();
+                            // Resolve the promise after the transition ends
+                            transition.each("end", function() {
+                                if (index < keyframes.length - 1) {
+                                    // Transition to the next keyframe after a delay
+                                    setTimeout(function() {
+                                        transitionKeyframes(index + 1).then(resolve);
+                                    }, duration);
+                                } else {
+                                    // Resolve the promise when all keyframes are processed
+                                    resolve();
+                                }
+                            });
+                        });
                     }
+
+                    // Start the transition by transitioning keyframes recursively
+                    transitionKeyframes(0);
                 }
             };
 

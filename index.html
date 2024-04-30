@@ -34,9 +34,7 @@
     const pack = data => d3.layout.pack()
         .size([width, height])
         .padding(3)
-      (d3.hierarchy(data)
-        .sum(d => d.value)
-        .sort((a, b) => b.value - a.value));
+      (d3.entries(data));
 
     // Create the SVG container.
     const svg = d3.select("body").append("svg")
@@ -69,7 +67,7 @@
       // Append the nodes.
       const node = svg.append("g")
         .selectAll("circle")
-        .data(rootPack.descendants().slice(1))
+        .data(rootPack)
         .enter().append("circle")
           .attr("fill", d => d.children ? color(d.depth) : "white")
           .attr("r", d => d.r)
@@ -84,13 +82,13 @@
           .style("font", "10px sans-serif")
           .attr("text-anchor", "middle")
         .selectAll("text")
-        .data(rootPack.descendants())
+        .data(rootPack)
         .enter().append("text")
-          .style("fill-opacity", d => d.parent === rootPack ? 1 : 0)
-          .style("display", d => d.parent === rootPack ? "inline" : "none")
+          .style("fill-opacity", d => d.depth === 1 ? 1 : 0)
+          .style("display", d => d.depth === 1 ? "inline" : "none")
           .attr("x", d => d.x)
           .attr("y", d => d.y)
-          .text(d => d.data.name);
+          .text(d => d.key);
     });
 
     function zoom(event, rootPack, d) {

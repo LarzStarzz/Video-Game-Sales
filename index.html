@@ -30,12 +30,6 @@
         .range(["hsl(152,80%,80%)", "hsl(228,30%,40%)"])
         .interpolate(d3.interpolateHcl);
 
-    // Compute the layout.
-    const pack = data => d3.layout.pack()
-        .size([width, height])
-        .padding(3)
-      (d3.entries(data));
-
     // Create the SVG container.
     const svg = d3.select("body").append("svg")
         .attr("viewBox", `-${width / 2} -${height / 2} ${width} ${height}`)
@@ -53,7 +47,6 @@
         .key(function(d) { return d.Year; })
         .key(function(d) { return d.Genre; })
         .key(function(d) { return d.Publisher; })
-        .key(function(d) { return "Global Sales"; })
         .entries(data);
 
       const root = {
@@ -62,12 +55,14 @@
       };
 
       // Compute the pack layout
-      const rootPack = pack(root);
+      const pack = d3.layout.pack()
+        .size([width, height])
+        .padding(3)
+        .nodes(root);
 
       // Append the nodes.
-      const node = svg.append("g")
-        .selectAll("circle")
-        .data(rootPack)
+      const node = svg.selectAll("circle")
+        .data(pack)
         .enter().append("circle")
           .attr("fill", d => d.children ? color(d.depth) : "white")
           .attr("r", d => d.r)
@@ -75,41 +70,39 @@
           .attr("cy", d => d.y)
           .on("mouseover", function() { d3.select(this).attr("stroke", "#000"); })
           .on("mouseout", function() { d3.select(this).attr("stroke", null); })
-          .on("click", (event, d) => zoom(event, rootPack, d));
+          .on("click", (event, d) => zoom(event, pack, d));
 
       // Append the text labels.
-      const label = svg.append("g")
-          .style("font", "10px sans-serif")
-          .attr("text-anchor", "middle")
-        .selectAll("text")
-        .data(rootPack)
+      const label = svg.selectAll("text")
+        .data(pack)
         .enter().append("text")
           .style("fill-opacity", d => d.depth === 1 ? 1 : 0)
           .style("display", d => d.depth === 1 ? "inline" : "none")
           .attr("x", d => d.x)
           .attr("y", d => d.y)
-          .text(d => d.key);
-    });
+          .text(d => `${d.Platform} - ${d.Year} - ${d.Genre} - ${d.Publisher}`);
 
-    function zoom(event, rootPack, d) {
-      const focus0 = rootPack;
-      const focus1 = d;
+      // Add transition for zooming
+      function zoom(event, pack, d) {
+        const focus0 = pack;
+        const focus1 = d;
 
-      const transition = svg.transition()
-          .duration(event.altKey ? 7500 : 750)
-          .tween("zoom", d => {
-            const i = d3.interpolateZoom(focus0, [focus1.x, focus1.y, focus1.r * 2]);
-            return t => zoomTo(i(t));
-          });
+        const transition = svg.transition()
+            .duration(event.altKey ? 7500 : 750)
+            .tween("zoom", d => {
+              const i = d3.interpolateZoom(focus0, [focus1.x, focus1.y, focus1.r * 2]);
+              return t => zoomTo(i(t));
+            });
 
-      function zoomTo(v) {
-        const k = width / v[2];
+        function zoomTo(v) {
+          const k = width / v[2];
 
-        node.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
-        label.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
-        node.attr("r", d => d.r * k);
+          node.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
+          label.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
+          node.attr("r", d => d.r * k);
+        }
       }
-    }
+    });
   </script>
 </body>
 </html>

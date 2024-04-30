@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zoomable Circle Packing</title>
+  <title>Circle Packing Chart</title>
   <script src="https://d3js.org/d3.v3.min.js"></script>
   <style>
     circle {
@@ -20,88 +20,82 @@
 </head>
 <body>
   <script>
-    // Specify the chart’s dimensions.
-    const width = 928;
-    const height = width;
+    // Define the Pack function
+    function Pack(data, options) {
+      const {
+        width = 640,
+        height = 400,
+        value = d => d.size,
+        label = (d, n) => `${d.name} (${n.value})`,
+        title = (d, n) => `${n.ancestors().reverse().map(({ data: d }) => d.name).join(".")} (${n.value})`,
+        link = (d, n) => null,
+        linkTarget = "_blank",
+        margin = 1,
+        padding = 3,
+        fill = "#ddd",
+        fillOpacity,
+        stroke = "#bbb",
+        strokeWidth,
+        strokeOpacity
+      } = options;
 
-    // Create the color scale.
-    const color = d3.scale.linear()
-        .domain([0, 5])
-        .range(["hsl(152,80%,80%)", "hsl(228,30%,40%)"])
-        .interpolate(d3.interpolateHcl);
+      const root = d3.hierarchy(data).sum(value);
 
-    // Create the SVG container.
-    const svg = d3.select("body").append("svg")
-        .attr("viewBox", `-${width / 2} -${height / 2} ${width} ${height}`)
+      d3.pack()
+        .size([width - margin * 2, height - margin * 2])
+        .padding(padding)
+        (root);
+
+      const svg = d3.select("body").append("svg")
         .attr("width", width)
         .attr("height", height)
-        .attr("style", `max-width: 100%; height: auto; display: block; margin: 0 -14px; cursor: pointer;`);
+        .append("g")
+        .attr("transform", `translate(${margin},${margin})`);
 
-    // Load data from CSV file and create the chart
+      const node = svg.selectAll("a")
+        .data(root.descendants())
+        .enter().append("a")
+        .attr("xlink:href", (d, i) => link(d.data, d))
+        .attr("target", linkTarget)
+        .attr("transform", d => `translate(${d.x},${d.y})`);
+
+      node.append("circle")
+        .attr("fill", d => d.children ? "#fff" : fill)
+        .attr("fill-opacity", d => d.children ? null : fillOpacity)
+        .attr("stroke", d => d.children ? stroke : null)
+        .attr("stroke-width", d => d.children ? strokeWidth : null)
+        .attr("stroke-opacity", d => d.children ? strokeOpacity : null)
+        .attr("r", d => d.r);
+
+      node.append("title").text((d, i) => title(d.data, d));
+
+      if (label) {
+        node.append("text")
+          .selectAll("tspan")
+          .data(d => label(d.data, d).split(/\n/g))
+          .enter().append("tspan")
+          .attr("x", 0)
+          .attr("y", (d, i, D) => `${(i - D.length / 2) + 0.85}em`)
+          .attr("fill-opacity", (d, i, D) => i === D.length - 1 ? 0.7 : null)
+          .text(d => d);
+      }
+
+      return svg.node();
+    }
+
+    // Load data from CSV and create the chart
     d3.csv("vgsales.csv", function(error, data) {
       if (error) throw error;
 
-      // Structure the data
-      const nestedData = d3.nest()
-        .key(function(d) { return d.Platform; })
-        .key(function(d) { return d.Year; })
-        .key(function(d) { return d.Genre; })
-        .key(function(d) { return d.Publisher; })
-        .entries(data);
+      const chart = Pack(data, {
+        width: 640,
+        height: 400,
+        label: (d, n) => `${d.Platform} - ${d.Year} - ${d.Genre} - ${d.Publisher} (${n.value})`,
+        title: (d, n) => `${n.ancestors().reverse().map(({ data: d }) => d.Platform).join(".")} (${n.value})`
+      });
 
-      const root = {
-        name: "Video Game Sales",
-        children: nestedData
-      };
-
-      // Compute the pack layout
-      const pack = d3.layout.pack()
-        .size([width, height])
-        .padding(3)
-        .nodes(root);
-
-      // Append the nodes.
-      const node = svg.selectAll("circle")
-        .data(pack)
-        .enter().append("circle")
-          .attr("fill", d => d.children ? color(d.depth) : "white")
-          .attr("r", d => d.r)
-          .attr("cx", d => d.x)
-          .attr("cy", d => d.y)
-          .on("mouseover", function() { d3.select(this).attr("stroke", "#000"); })
-          .on("mouseout", function() { d3.select(this).attr("stroke", null); })
-          .on("click", (event, d) => zoom(event, pack, d));
-
-      // Append the text labels.
-      const label = svg.selectAll("text")
-        .data(pack)
-        .enter().append("text")
-          .style("fill-opacity", d => d.depth === 1 ? 1 : 0)
-          .style("display", d => d.depth === 1 ? "inline" : "none")
-          .attr("x", d => d.x)
-          .attr("y", d => d.y)
-          .text(d => d.name);
-
-      // Add transition for zooming
-      function zoom(event, pack, d) {
-        const focus0 = pack;
-        const focus1 = d;
-
-        const transition = svg.transition()
-            .duration(event.altKey ? 7500 : 750)
-            .tween("zoom", d => {
-              const i = d3.interpolateZoom(focus0, [focus1.x, focus1.y, focus1.r * 2]);
-              return t => zoomTo(i(t));
-            });
-
-        function zoomTo(v) {
-          const k = width / v[2];
-
-          node.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
-          label.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
-          node.attr("r", d => d.r * k);
-        }
-      }
+      // Append the chart to the body
+      document.body.appendChild(chart);
     });
   </script>
 </body>

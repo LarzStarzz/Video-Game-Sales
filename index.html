@@ -30,12 +30,30 @@
 
     <script src="https://d3js.org/d3.v3.min.js"></script>
     <script>
-        // Load the data
+        // Load the data (this is just an example, replace with your actual data loading code)
         d3.csv("vgsales.csv", function(error, data) {
             if (error) {
                 console.log("Error loading data:", error);
                 return;
             }
+
+            // Convert sales values to numbers
+            data.forEach(function(d) {
+                d.Global_Sales = +d.Global_Sales;
+                d.Year = +d.Year;
+            });
+
+            // Define keyframes array with hardcoded data (replace with your actual data)
+            const keyframes = [];
+
+            // Generate keyframes from data
+            data.forEach(function(d) {
+                // Example: Create a keyframe object with year and data for each year
+                keyframes.push({
+                    year: d.Year,
+                    data: data.filter(function(row) { return row.Year === d.Year; }) // Filter data for the current year
+                });
+            });
 
             // Set up constants and variables
             const margin = { top: 20, right: 30, bottom: 30, left: 60 };
@@ -44,14 +62,7 @@
             let currentYear = 2000; // Starting year
             const duration = 1000; // Transition duration
 
-            // Convert sales values to numbers
-            data.forEach(function(d) {
-                d.Global_Sales = +d.Global_Sales;
-                d.Year = +d.Year;
-            });
-
             // Create SVG element
-// Create SVG element
             const svg = d3.select("#barchart-container")
                 .append("svg")
                 .attr("viewBox", "0 0 " + width + " " + height)
@@ -60,12 +71,11 @@
                 .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-
             // Define functions to update different chart components
             function updateBars(keyframe, transition) {
                 // Update bars
                 const bars = svg.selectAll(".bar")
-                    .data(keyframe, function(d) { return d.Name; });
+                    .data(keyframe.data, function(d) { return d.Name; });
 
                 // Enter
                 bars.enter().append("rect")
@@ -98,7 +108,7 @@
             function updateLabels(keyframe, transition) {
                 // Update labels
                 const labels = svg.selectAll(".label")
-                    .data(keyframe, function(d) { return d.Name; });
+                    .data(keyframe.data, function(d) { return d.Name; });
 
                 // Enter
                 labels.enter().append("text")
@@ -119,7 +129,7 @@
             function updateTicker(keyframe, transition) {
                 // Update ticker
                 svg.select(".ticker")
-                    .text("Year: " + keyframe.Year);
+                    .text("Year: " + keyframe.year);
             }
 
             // Define chart object

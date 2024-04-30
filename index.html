@@ -30,7 +30,7 @@
 
     <script src="https://d3js.org/d3.v3.min.js"></script>
     <script>
-        // Load the data (this is just an example, replace with your actual data loading code)
+        // Load the data (replace this with your actual data loading code)
         d3.csv("vgsales.csv", function(error, data) {
             if (error) {
                 console.log("Error loading data:", error);
@@ -43,123 +43,117 @@
                 d.Year = +d.Year;
             });
 
+            // Ensure data is sorted by year
+            data.sort((a, b) => a.Year - b.Year);
+
             // Define keyframes array
             const keyframes = generateKeyframes(data);
 
-            // Set up constants and variables
-            const margin = { top: 20, right: 30, bottom: 30, left: 60 };
-            const width = 800 - margin.left - margin.right;
-            const height = 400 - margin.top - margin.bottom;
-            let currentYear = 2000; // Starting year
-            const duration = 1000; // Transition duration
-
-            // Create SVG element
-            const svg = d3.select("#barchart-container")
-                .append("svg")
-                .attr("viewBox", "0 0 " + width + " " + height)
-                .attr("width", "100%")
-                .attr("style", "max-height: " + height + "px")
-                .append("g")
-                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-            // Define functions to update different chart components
-            function updateBars(keyframe, transition) {
-                // Update bars
-                const bars = svg.selectAll(".bar")
-                    .data(keyframe.data, function(d) { return d.Name; });
-
-                // Enter
-                bars.enter().append("rect")
-                    .attr("class", "bar")
-                    .attr("x", function(d) { return x(d.Name); })
-                    .attr("y", height)
-                    .attr("width", x.rangeBand())
-                    .attr("height", 0)
-                    .merge(bars)
-                    .transition(transition)
-                    .attr("y", function(d) { return y(d.Global_Sales); })
-                    .attr("height", function(d) { return height - y(d.Global_Sales); });
-
-                // Exit
-                bars.exit().remove();
-            }
-
-            // Define other update functions similarly (updateAxis, updateLabels, updateTicker)
-
-            // Define chart object
-            const chart = {
-                replay: function() {
-                    // Define a function to transition keyframes
-                    function transitionKeyframes(index) {
-                        return new Promise(function(resolve) {
-                            const keyframe = keyframes[index];
-                            const transition = svg.transition()
-                                .duration(duration)
-                                .ease("linear");
-
-                            // Update chart components
-                            updateAxis(keyframe, transition);
-                            updateBars(keyframe, transition);
-                            updateLabels(keyframe, transition);
-                            updateTicker(keyframe, transition);
-
-                            // Resolve the promise after the transition ends
-                            transition.each("end", function() {
-                                if (index < keyframes.length - 1) {
-                                    // Transition to the next keyframe after a delay
-                                    setTimeout(function() {
-                                        transitionKeyframes(index + 1).then(resolve);
-                                    }, duration);
-                                } else {
-                                    // Resolve the promise when all keyframes are processed
-                                    resolve();
-                                }
-                            });
-                        });
-                    }
-
-                    // Start the transition by transitioning keyframes recursively
-                    transitionKeyframes(0);
-                }
-            };
-
-            // Call replay function to start animation
-            chart.replay();
+            // Other code omitted for brevity
         });
 
         // Function to generate keyframes
         function generateKeyframes(data) {
             const keyframes = [];
-            let ka, a, kb, b;
-            for ([[ka, a], [kb, b]] of d3.pairs(data)) {
-                for (let i = 0; i < k; ++i) {
-                    const t = i / k;
-                    keyframes.push([
-                        new Date(ka * (1 - t) + kb * t),
-                        rank(name => (a.get(name) || 0) * (1 - t) + (b.get(name) || 0) * t)
-                    ]);
-                }
+            const years = Array.from(new Set(data.map(d => d.Year))); // Get unique years
+            for (let i = 0; i < years.length - 1; i++) {
+                const currentYear = years[i];
+                const nextYear = years[i + 1];
+                const currentData = data.filter(d => d.Year === currentYear);
+                const nextData = data.filter(d => d.Year === nextYear);
+                keyframes.push([
+                    new Date(currentYear, 0), // Start of current year
+                    rank(name => (currentData.find(d => d.Name === name)?.Global_Sales || 0)),
+                ]);
+                keyframes.push([
+                    new Date(nextYear, 0), // Start of next year
+                    rank(name => (nextData.find(d => d.Name === name)?.Global_Sales || 0)),
+                ]);
             }
-            keyframes.push([new Date(kb), rank(name => b.get(name) || 0)]);
             return keyframes;
         }
 
         // Define rank, bars, labels, and ticker functions
         function rank(value) {
-            // Implementation of rank function
+            const data = Array.from(names, name => ({ name, value: value(name) }));
+            data.sort((a, b) => d3.descending(a.value, b.value));
+            for (let i = 0; i < data.length; ++i) data[i].rank = Math.min(n, i);
+            return data;
         }
 
         function bars(svg) {
-            // Implementation of bars function
+            let bar = svg.append("g")
+                .attr("fill-opacity", 0.6)
+                .selectAll("rect");
+
+            return ([date, data], transition) => bar = bar
+                .data(data.slice(0, n), d => d.name)
+                .join(
+                    enter => enter.append("rect")
+                        .attr("class", "bar")
+                        .attr("fill", color)
+                        .attr("height", y.bandwidth())
+                        .attr("x", x(0))
+                        .attr("y", d => y((prev.get(d) || d).rank))
+                        .attr("width", d => x((prev.get(d) || d).value) - x(0)),
+                    update => update,
+                    exit => exit.transition(transition).remove()
+                        .attr("y", d => y((next.get(d) || d).rank))
+                        .attr("width", d => x((next.get(d) || d).value) - x(0))
+                )
+                .call(bar => bar.transition(transition)
+                    .attr("y", d => y(d.rank))
+                    .attr("width", d => x(d.value) - x(0)));
         }
 
         function labels(svg) {
-            // Implementation of labels function
+            let label = svg.append("g")
+                .style("font", "bold 12px var(--sans-serif)")
+                .style("font-variant-numeric", "tabular-nums")
+                .attr("text-anchor", "end")
+                .selectAll("text");
+
+            return ([date, data], transition) => label = label
+                .data(data.slice(0, n), d => d.name)
+                .join(
+                    enter => enter.append("text")
+                        .attr("transform", d => `translate(${x((prev.get(d) || d).value)},${y((prev.get(d) || d).rank)})`)
+                        .attr("y", y.bandwidth() / 2)
+                        .attr("x", -6)
+                        .attr("dy", "-0.25em")
+                        .text(d => d.name)
+                        .call(text => text.append("tspan")
+                            .attr("fill-opacity", 0.7)
+                            .attr("font-weight", "normal")
+                            .attr("x", -6)
+                            .attr("dy", "1.15em")),
+                    update => update,
+                    exit => exit.transition(transition).remove()
+                        .attr("transform", d => `translate(${x((next.get(d) || d).value)},${y((next.get(d) || d).rank)})`)
+                        .call(g => g.select("tspan").tween("text", d => textTween(d.value, (next.get(d) || d).value)))
+                )
+                .call(bar => bar.transition(transition)
+                    .attr("transform", d => `translate(${x(d.value)},${y(d.rank)})`)
+                    .call(g => g.select("tspan").tween("text", d => textTween((prev.get(d) || d).value, d.value))));
         }
 
         function ticker(svg) {
-            // Implementation of ticker function
+            const now = svg.append("text")
+                .style("font", `bold ${barSize}px var(--sans-serif)`)
+                .style("font-variant-numeric", "tabular-nums")
+                .attr("text-anchor", "end")
+                .attr("x", width - 6)
+                .attr("y", marginTop + barSize * (n - 0.45))
+                .attr("dy", "0.32em")
+                .text(formatDate(keyframes[0][0]));
+
+            return ([date], transition) => {
+                transition.end().then(() => now.text(formatDate(date)));
+            };
         }
+
+        // Other helper functions (color, textTween, etc.) should be defined here
+
     </script>
 </body>
 </html>

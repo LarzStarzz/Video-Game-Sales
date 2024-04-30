@@ -41,12 +41,13 @@
         name: "Video Game Sales",
         children: data.map(function(d) {
           return {
-            name: d.Category,
+            name: d.Name,
             children: [
-              { name: d.Platform, size: +d.PlatformSales },
-              { name: d.Publisher, size: +d.PublisherSales },
-              { name: d.Year, size: +d.YearSales },
-              { name: "Global Sales", size: +d.GlobalSales }
+              { name: "Platform: " + d.Platform, size: +d.PlatformSales },
+              { name: "Year: " + d.Year, size: +d.YearSales },
+              { name: "Genre: " + d.Genre, size: 1 }, // Adjust size if needed
+              { name: "Publisher: " + d.Publisher, size: +d.PublisherSales },
+              { name: "Global Sales", size: +d.Global_Sales }
             ]
           };
         })

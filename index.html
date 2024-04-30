@@ -67,8 +67,8 @@
                 .rangeRoundBands([0, width], 0.1);
 
 
-            const y = d3.scaleLinear()
-                .domain([0, d3.max(currentData, d => d.Global_Sales)])
+            const y = d3.scale.linear()
+                .domain([0, d3.max(currentData, function(d) { return d.Global_Sales; })])
                 .nice()
                 .range([height, 0]);
 

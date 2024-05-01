@@ -7,6 +7,10 @@
 <body>
 
 <h1>Scatterplot Example</h1>
+<div>
+    <label><input type="checkbox" class="checkbox" id="publisher1" checked> Publisher 1</label>
+    <label><input type="checkbox" class="checkbox" id="publisher2" checked> Publisher 2</label>
+</div>
 <svg width="800" height="600"></svg>
 
 <script>
@@ -44,7 +48,7 @@
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
         // Draw the circles for each data point with different colors for each publisher
-        svg.selectAll("circle")
+        var circles = svg.selectAll("circle")
             .data(data)
             .enter()
             .append("circle")
@@ -76,6 +80,22 @@
             .attr("dy", "1em")
             .style("text-anchor", "middle")
             .text("Global Sales");
+
+        // Checkbox event listeners
+        d3.selectAll(".checkbox").on("change", update);
+
+        function update() {
+            var checkedPublishers = [];
+            d3.selectAll(".checkbox").each(function(d) {
+                if (this.checked) {
+                    checkedPublishers.push(this.id);
+                }
+            });
+
+            circles.attr("display", function(d) {
+                return checkedPublishers.includes(d.Publisher) ? "initial" : "none";
+            });
+        }
     });
 </script>
 

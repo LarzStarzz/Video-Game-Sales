@@ -26,33 +26,30 @@
 
             // Define scales
             var xScale = d3.scaleLinear()
-                .domain([d3.min(data, d => +d.year), d3.max(data, d => +d.year)])
+                .domain([d3.min(data, d => +d.body_mass_g), d3.max(data, d => +d.body_mass_g)])
                 .range([0, width]);
 
             var yScale = d3.scaleLinear()
-                .domain([0, d3.max(data, d => +d.globalSales)])
+                .domain([d3.min(data, d => +d.culmen_length_mm), d3.max(data, d => +d.culmen_length_mm)])
                 .range([height, 0]);
-
-            // Define color scale
-            var colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
             // Draw dots
             svg.selectAll("circle")
                 .data(data)
                 .enter().append("circle")
-                .attr("cx", d => xScale(+d.year))
-                .attr("cy", d => yScale(+d.globalSales))
+                .attr("cx", d => xScale(+d.body_mass_g))
+                .attr("cy", d => yScale(+d.culmen_length_mm))
                 .attr("r", 5)
-                .style("fill", d => colorScale(d.publisher));
+                .style("stroke", d => d.species); // Color based on species
 
             // Add X-axis
             svg.append("g")
                 .attr("transform", "translate(0," + height + ")")
-                .call(d3.axisBottom(xScale).ticks(5).tickFormat(d3.format("d")));
+                .call(d3.axisBottom(xScale));
 
             // Add Y-axis
             svg.append("g")
-                .call(d3.axisLeft(yScale)));
+                .call(d3.axisLeft(yScale));
         });
     </script>
 </body>

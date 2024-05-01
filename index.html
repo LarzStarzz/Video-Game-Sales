@@ -1,53 +1,57 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <!-- Step 2 -->
-    <script src="https://d3js.org/d3.v4.min.js"></script>
-    <div id = "dataviz"></div>
+    <title>D3.js Scatterplot Example</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
-    <script>
-        
-        var margin = {top: 10, right: 30, bottom: 30, left: 60},
-            width = 460 - margin.left - margin.right,
-            height = 400 - margin.top - margin.bottom;
 
-        var svg = d3.select("#my_dataviz")
-            .append("svg")
-                .attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom)
-            .append("g")
-                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+<h1>Scatterplot Example</h1>
+<svg width="500" height="500"></svg>
 
-        d3.csv("https://raw.githubusercontent.com/LarzStarzz/Video-Game-Sales/main/vgsales.csv", function(data){
+<script>
+    // Parse the CSV data
+    d3.csv("vgsale.csv", function(data) {
+        // Create the scale for x-axis
+        var x = d3.scaleLinear()
+            .domain([1980, 2020])
+            .range([0, 490]);
 
-            var x = d3.scaleLinear()
-                .domain([1980, 2020])
-                .range([ 0, width ]);
-              svg.append("g")
-                .attr("transform", "translate(0," + height + ")")
-                .call(d3.axisBottom(x));
+        // Create the scale for y-axis
+        var y = d3.scaleLinear()
+            .domain([0, 42])
+            .range([490, 0]);
 
-            var y = d3.scaleLinear()
-                .domain([0, 42])
-                .range([ height, 0]);
-              svg.append("g")
-                .call(d3.axisLeft(y));
+        // Create the axis for x-axis
+        var xAxis = d3.axisBottom(x);
 
-            svg.append('g')
-                .selectAll("dot")
-                .data(data)
-                .enter()
-                .append("circle")
-                  .attr("cx", function (d) { return x(d.GrLivArea); } )
-                  .attr("cy", function (d) { return y(d.SalePrice); } )
-                  .attr("r", 1.5)
-                  .style("fill", "#69b3a2")
+        // Create the axis for y-axis
+        var yAxis = d3.axisLeft(y);
 
+        // Select the SVG element
+        var svg = d3.select("svg");
 
-        })
-        
-        
-    </script>
+        // Draw the circles for each data point
+        svg.selectAll("circle")
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("cx", function(d) { return x(d.Year); })
+            .attr("cy", function(d) { return y(d.Global_Sales); })
+            .attr("r", 5)
+            .attr("fill", "steelblue");
+
+        // Add the x-axis
+        svg.append("g")
+            .attr("transform", "translate(0," + 490 + ")")
+            .call(xAxis);
+
+        // Add the y-axis
+        svg.append("g")
+            .attr("transform", "translate(" + 0 + ",0)")
+            .call(yAxis);
+    });
+</script>
+
 </body>
 </html>

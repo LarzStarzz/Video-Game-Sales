@@ -3,81 +3,23 @@
 <head>
     <!-- Step 2 -->
     <script src="https://d3js.org/d3.v4.min.js"></script>
+    <div id = "dataviz"></div>
 </head>
 <body>
-    <!-- Step 2 -->
-    <svg width="500" height="400"></svg>
     <script>
-        // Step 3
-        var svg = d3.select("svg"),
-            margin = 200,
-            width = svg.attr("width") - margin, // Adjust width
-            height = svg.attr("height") - margin; // Adjust height
+        
+        var margin = {top: 10, right: 30, bottom: 30, left: 60},
+            width = 460 - margin.left - margin.right,
+            height = 400 - margin.top - margin.bottom;
 
-        // Step 4
-        var xScale = d3.scaleLinear().range([0, width]),
-            yScale = d3.scaleLinear().range([height, 0]);
-
-        var g = svg.append("g")
-            .attr("transform", "translate(" + 100 + "," + 100 + ")");
-
-        // Step 5
-        // Title
-        svg.append('text')
-            .attr('x', width / 2 + 100)
-            .attr('y', 100)
-            .attr('text-anchor', 'middle')
-            .style('font-family', 'Helvetica')
-            .style('font-size', 20)
-            .text('Scatter Plot');
-
-        // X label
-        svg.append('text')
-            .attr('x', width / 2 + 100)
-            .attr('y', height - 15 + 150)
-            .attr('text-anchor', 'middle')
-            .style('font-family', 'Helvetica')
-            .style('font-size', 12)
-            .text('Independent');
-
-        // Y label
-        svg.append('text')
-            .attr('text-anchor', 'middle')
-            .attr('transform', 'translate(60,' + height + ')rotate(-90)')
-            .style('font-family', 'Helvetica')
-            .style('font-size', 12)
-            .text('Dependent');
-
-        // Load data from CSV
-        d3.csv("vgsales.csv").then(function(data) {
-            // Convert string to number for numerical columns
-            data.forEach(function(d) {
-                d.x = +d.x;
-                d.y = +d.y;
-            });
-
-            // Set the domains
-            xScale.domain([d3.min(data, function(d) { return d.x; }), d3.max(data, function(d) { return d.x; })]);
-            yScale.domain([d3.min(data, function(d) { return d.y; }), d3.max(data, function(d) { return d.y; })]);
-
-            // Draw X-axis
-            g.append("g")
-                .attr("transform", "translate(0," + height + ")")
-                .call(d3.axisBottom(xScale));
-
-            // Draw Y-axis
-            g.append("g")
-                .call(d3.axisLeft(yScale));
-
-            // Draw circles
-            g.selectAll("circle")
-                .data(data)
-                .enter().append("circle")
-                .attr("cx", function(d) { return xScale(d.x); })
-                .attr("cy", function(d) { return yScale(d.y); })
-                .attr("r", 5) // Adjust radius if needed
-                .style("fill", "#CC0000");
-        });
+        var svg = d3.select("#my_dataviz")
+            .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        
+        
     </script>
 </body>
 </html>

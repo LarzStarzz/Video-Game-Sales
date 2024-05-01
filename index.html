@@ -36,7 +36,7 @@
             .range([0, width]); 
 
         var y = d3.scaleLinear()
-            .domain([3, 48]) // Updated domain to start at 3
+            .domain([3, 48])
             .range([height, 0]);
 
         var xAxis = d3.axisBottom(x);
@@ -57,7 +57,7 @@
             .attr("cx", function(d) { return x(+d.EU_Sales); })
             .attr("cy", function(d) { return y(+d.Global_Sales); })
             .attr("r", 5)
-            .attr("fill", function(d) { return color(d.Publisher); });
+            .attr("fill", function(d) { return color(d.Genre); }); // Use Genre for colors
 
         svg.append("g")
             .attr("transform", "translate(0," + height + ")")
@@ -79,10 +79,10 @@
             .style("text-anchor", "middle")
             .text("NA Sales");
 
-        var uniquePublishers = [...new Set(data.map(d => d.Publisher))];
+        var uniqueGenres = [...new Set(data.map(d => d.Genre))];
         var checkboxDiv = d3.select("#checkboxes");
-        uniquePublishers.forEach(function(publisher) {
-            checkboxDiv.append("label").html(`<input type="checkbox" class="checkbox" id="${publisher}" checked>${publisher}`);
+        uniqueGenres.forEach(function(genre) {
+            checkboxDiv.append("label").html(`<input type="checkbox" class="checkbox" id="${genre}" checked>${genre}`);
         });
     });
 </script>

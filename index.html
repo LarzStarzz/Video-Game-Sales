@@ -65,6 +65,19 @@
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+        var checkboxes = d3.select("#checkboxes")
+            .selectAll("input")
+            .data(data)
+            .enter()
+            .append("label")
+            .attr("for", function(d) { return d.Genre; })
+            .text(function(d) { return d.Genre; })
+            .append("input")
+            .attr("type", "checkbox")
+            .attr("id", function(d) { return d.Genre; })
+            .attr("value", function(d) { return d.Genre; })
+            .property("checked", true);
+
         var circles = svg.selectAll("circle")
             .data(data)
             .enter()

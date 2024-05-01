@@ -8,6 +8,14 @@
             justify-content: center;
         }
 
+        #tooltip {
+            position: absolute;
+            display: none;
+            padding: 10px;
+            background: lightgray;
+            border: 1px solid black;
+        }
+
         #checkboxes {
             margin-right: 20px;
             display: block;
@@ -30,6 +38,7 @@
     <div id="checkboxes"></div>
     <svg width="800" height="600"></svg>
 </div>
+<div id="tooltip"></div>
 
 <script>
     d3.csv("vg_sales.csv", function(data) {
@@ -38,11 +47,11 @@
         var height = 600 - margin.top - margin.bottom;
 
         var x = d3.scaleLinear()
-            .domain([0, 15]) 
+            .domain([0, d3.max(data, function(d) { return +d.NA_Sales; })]) 
             .range([0, width]); 
 
         var y = d3.scaleLinear()
-            .domain([3, 48])
+            .domain([0, d3.max(data, function(d) { return +d.Global_Sales; })])
             .range([height, 0]);
 
         var xAxis = d3.axisBottom(x);
@@ -60,11 +69,21 @@
             .data(data)
             .enter()
             .append("circle")
-            .attr("cx", function(d) { return x(+d.EU_Sales); })
+            .attr("cx", function(d) { return x(+d.NA_Sales); })
             .attr("cy", function(d) { return y(+d.Global_Sales); })
             .attr("r", 5)
-            .attr("fill", function(d) { return color(d.Genre); }) // Use Genre for colors
-            .attr("display", "block");
+            .attr("fill", function(d) { return color(d.Genre); })
+            .attr("display", "block")
+            .on("mouseover", function(d) {
+                d3.select("#tooltip")
+                    .style("display", "block")
+                    .html(`<strong>${d.Name}</strong> - ${d.Platform}`)
+                    .style("left", (d3.event.pageX + 10) + "px")
+                    .style("top", (d3.event.pageY - 20) + "px");
+            })
+            .on("mouseout", function() {
+                d3.select("#tooltip").style("display", "none");
+            });
 
         svg.append("g")
             .attr("class", "x-axis")
@@ -74,7 +93,7 @@
         svg.append("text")
             .attr("transform", "translate(" + (width / 2) + " ," + (height + margin.top + 20) + ")")
             .style("text-anchor", "middle")
-            .text("EU Sales");
+            .text("NA Sales");
 
         svg.append("g")
             .attr("class", "y-axis")
@@ -86,37 +105,8 @@
             .attr("x", 0 - (height / 2))
             .attr("dy", "1em")
             .style("text-anchor", "middle")
-            .text("NA Sales");
-
-        var uniqueGenres = [...new Set(data.map(d => d.Genre))];
-        var checkboxDiv = d3.select("#checkboxes");
-        uniqueGenres.forEach(function(genre) {
-            checkboxDiv.append("label").html(`<input type="checkbox" class="checkbox" id="${genre}" checked>${genre}`);
-        });
-
-        d3.selectAll(".checkbox").on("change", update);
-
-        function update() {
-            var display = this.checked ? "block" : "none";
-            var genre = this.id;
-            svg.selectAll("circle")
-                .filter(function(d) { return d.Genre === genre; })
-                .attr("display", display);
-
-            var displayedData = data.filter(d => d3.select(`#${d.Genre}`).property("checked"));
-            var xExtent = d3.extent(displayedData, d => +d.EU_Sales);
-            var yExtent = d3.extent(displayedData, d => +d.Global_Sales);
-
-            x.domain([xExtent[0] - 1, xExtent[1] + 1]);
-            y.domain([yExtent[0] - 1, yExtent[1] + 1]);
-
-            svg.select(".x-axis").call(xAxis);
-            svg.select(".y-axis").call(yAxis);
-
-            circles.attr("cx", d => x(+d.EU_Sales)).attr("cy", d => y(+d.Global_Sales));
-        }
+            .text("Global Sales");
     });
 </script>
-
 </body>
 </html>

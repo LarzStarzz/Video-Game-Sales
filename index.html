@@ -22,9 +22,9 @@
             .domain([0, d3.max(data, function(d) { return +d.NA_Sales; })])
             .range([0, width]);
 
-        // Create the scale for y-axis
+        // Create the scale for y-axis starting at 0
         var y = d3.scaleLinear()
-            .domain([5, 45])
+            .domain([0, 45])
             .range([height, 0]);
 
         // Create the axis for x-axis
@@ -58,9 +58,24 @@
             .attr("transform", "translate(0," + height + ")")
             .call(xAxis);
 
+        // Add x-axis label
+        svg.append("text")
+            .attr("transform", "translate(" + (width / 2) + " ," + (height + margin.top + 20) + ")")
+            .style("text-anchor", "middle")
+            .text("NA Sales");
+
         // Add the y-axis
         svg.append("g")
             .call(yAxis);
+
+        // Add y-axis label
+        svg.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 0 - margin.left)
+            .attr("x", 0 - (height / 2))
+            .attr("dy", "1em")
+            .style("text-anchor", "middle")
+            .text("Global Sales");
     });
 </script>
 

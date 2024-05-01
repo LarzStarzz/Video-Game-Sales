@@ -2,49 +2,55 @@
 <html>
 <head>
     <title>D3.js Scatterplot Example</title>
+    <style>
+        .container {
+            display: flex;
+            justify-content: center;
+        }
+
+        #checkboxes {
+            margin-right: 20px;
+        }
+
+        svg {
+            margin: 0 auto;
+            display: block;
+        }
+    </style>
     <script src="https://d3js.org/d3.v4.min.js"></script>
 </head>
 <body>
-
-<h1>Scatterplot Example</h1>
-<div id="checkboxes"></div>
-<svg width="800" height="600"></svg>
+<div class="container">
+    <div id="checkboxes"></div>
+    <svg width="800" height="600"></svg>
+</div>
 
 <script>
     // Load the CSV data
     d3.csv("vg_sales.csv", function(data) {
-        // Set the margins
         var margin = { top: 20, right: 20, bottom: 50, left: 50 };
         var width = 800 - margin.left - margin.right;
         var height = 600 - margin.top - margin.bottom;
 
-        // Create the scale for x-axis based on EU_Sales
         var x = d3.scaleLinear()
-            .domain([0, 15]) // Adjusted range for EU_Sales
-            .range([0, width]); // Stretching the graph to the right
+            .domain([0, 15]) 
+            .range([0, width]); 
 
-        // Create the scale for y-axis starting at 0
         var y = d3.scaleLinear()
             .domain([0, 45])
             .range([height, 0]);
 
-        // Create the axis for x-axis
         var xAxis = d3.axisBottom(x);
-
-        // Create the axis for y-axis
         var yAxis = d3.axisLeft(y);
 
-        // Color scale for different publishers
         var color = d3.scaleOrdinal(d3.schemeCategory10);
 
-        // Select the SVG element with margins
         var svg = d3.select("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-        // Draw the circles for each data point with different colors for each publisher
         var circles = svg.selectAll("circle")
             .data(data)
             .enter()
@@ -54,55 +60,31 @@
             .attr("r", 5)
             .attr("fill", function(d) { return color(d.Publisher); });
 
-        // Add the x-axis
         svg.append("g")
             .attr("transform", "translate(0," + height + ")")
             .call(xAxis);
 
-        // Add x-axis label
         svg.append("text")
             .attr("transform", "translate(" + (width / 2) + " ," + (height + margin.top + 20) + ")")
             .style("text-anchor", "middle")
             .text("EU Sales");
 
-        // Add the y-axis
         svg.append("g")
             .call(yAxis);
 
-        // Add y-axis label
         svg.append("text")
             .attr("transform", "rotate(-90)")
             .attr("y", 0 - margin.left)
             .attr("x", 0 - (height / 2))
             .attr("dy", "1em")
             .style("text-anchor", "middle")
-            .text("Global Sales");
+            .text("NA Sales");
 
-        // Get unique publishers
         var uniquePublishers = [...new Set(data.map(d => d.Publisher))];
-
-        // Create checkboxes for each unique publisher
         var checkboxDiv = d3.select("#checkboxes");
         uniquePublishers.forEach(function(publisher) {
-            checkboxDiv.append("label")
-                .html(`<input type="checkbox" class="checkbox" id="${publisher}" checked>${publisher}`);
+            checkboxDiv.append("label").html(`<input type="checkbox" class="checkbox" id="${publisher}" checked>${publisher}`);
         });
-
-        // Checkbox event listeners
-        d3.selectAll(".checkbox").on("change", update);
-
-        function update() {
-            var checkedPublishers = [];
-            d3.selectAll(".checkbox").each(function(d) {
-                if (this.checked) {
-                    checkedPublishers.push(this.id);
-                }
-            });
-
-            circles.attr("display", function(d) {
-                return checkedPublishers.includes(d.Publisher) ? "initial" : "none";
-            });
-        }
     });
 </script>
 

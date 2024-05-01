@@ -45,30 +45,30 @@
         var margin = { top: 20, right: 20, bottom: 50, left: 50 };
         var width = 800 - margin.left - margin.right;
         var height = 600 - margin.top - margin.bottom;
-
+    
         var x = d3.scaleLinear()
             .domain([0, d3.max(data, function(d) { return +d.NA_Sales; })]) 
             .range([0, width]); 
-
+    
         var y = d3.scaleLinear()
             .domain([0, d3.max(data, function(d) { return +d.Global_Sales; })])
             .range([height, 0]);
-
+    
         var xAxis = d3.axisBottom(x);
         var yAxis = d3.axisLeft(y);
-
+    
         var color = d3.scaleOrdinal(d3.schemeCategory10);
-
+    
         var svg = d3.select("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
+    
         var genres = d3.nest()
             .key(function(d) { return d.Genre; })
             .entries(data);
-
+    
         var checkboxes = d3.select("#checkboxes")
             .selectAll("input")
             .data(genres)
@@ -80,18 +80,18 @@
             .attr("value", function(d) { return d.key; })
             .property("checked", true)
             .on("change", updateDataPoints);
-
+    
         function updateDataPoints() {
             var selectedGenres = checkboxes.filter(function(d) {
                 return this.checked;
             }).data().map(function(d) { return d.key; });
-
+    
             svg.selectAll("circle")
                 .style("display", function(d) {
                     return selectedGenres.includes(d.Genre) ? "block" : "none";
                 });
         }
-
+    
         var circles = svg.selectAll("circle")
             .data(data)
             .enter()
@@ -99,18 +99,28 @@
             .attr("cx", function(d) { return x(+d.NA_Sales); })
             .attr("cy", function(d) { return y(+d.Global_Sales); })
             .attr("r", 5)
-            .attr("fill", function(d) { return color(d.Genre); });
-
+            .attr("fill", function(d) { return color(d.Genre); })
+            .on("mouseover", function(d) {
+                d3.select("#tooltip")
+                    .style("display", "block")
+                    .html(`<strong>${d.Name}</strong> - ${d.Platform}`)
+                    .style("left", (d3.event.pageX + 10) + "px")
+                    .style("top", (d3.event.pageY - 20) + "px");
+            })
+            .on("mouseout", function() {
+                d3.select("#tooltip").style("display", "none");
+            });
+    
         svg.append("g")
             .attr("class", "x-axis")
             .attr("transform", "translate(0," + height + ")")
             .call(xAxis);
-
+    
         svg.append("text")
             .attr("transform", "translate(" + (width / 2) + " ," + (height + margin.top + 20) + ")")
             .style("text-anchor", "middle")
             .text("NA Sales");
-
+    
         svg.append("g")
             .attr("class", "y-axis")
             .call(yAxis);

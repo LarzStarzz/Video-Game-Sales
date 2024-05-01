@@ -7,10 +7,7 @@
 <body>
 
 <h1>Scatterplot Example</h1>
-<div>
-    <label><input type="checkbox" class="checkbox" id="publisher1" checked> Publisher 1</label>
-    <label><input type="checkbox" class="checkbox" id="publisher2" checked> Publisher 2</label>
-</div>
+<div id="checkboxes"></div>
 <svg width="800" height="600"></svg>
 
 <script>
@@ -80,6 +77,16 @@
             .attr("dy", "1em")
             .style("text-anchor", "middle")
             .text("Global Sales");
+
+        // Get unique publishers
+        var uniquePublishers = [...new Set(data.map(d => d.Publisher))];
+
+        // Create checkboxes for each unique publisher
+        var checkboxDiv = d3.select("#checkboxes");
+        uniquePublishers.forEach(function(publisher) {
+            checkboxDiv.append("label")
+                .html(`<input type="checkbox" class="checkbox" id="${publisher}" checked>${publisher}`);
+        });
 
         // Checkbox event listeners
         d3.selectAll(".checkbox").on("change", update);

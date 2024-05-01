@@ -33,7 +33,7 @@
         // Create the axis for y-axis
         var yAxis = d3.axisLeft(y);
 
-        // Color scale for different publishers
+        // Color scale for different genres
         var color = d3.scaleOrdinal(d3.schemeCategory10);
 
         // Select the SVG element with margins
@@ -43,7 +43,7 @@
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-        // Draw the circles for each data point with different colors for each publisher
+        // Draw the circles for each data point with different colors for each genre
         svg.selectAll("circle")
             .data(data)
             .enter()
@@ -51,7 +51,7 @@
             .attr("cx", function(d) { return x(+d.Year); })
             .attr("cy", function(d) { return y(+d.Global_Sales); })
             .attr("r", 5)
-            .attr("fill", function(d) { return color(d.Publisher); });
+            .attr("fill", function(d) { return color(d.Genre); });
 
         // Add the x-axis
         svg.append("g")

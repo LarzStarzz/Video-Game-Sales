@@ -7,20 +7,25 @@
 <body>
 
 <h1>Scatterplot Example</h1>
-<svg width="500" height="500"></svg>
+<svg width="600" height="600"></svg>
 
 <script>
     // Load the CSV data
     d3.csv("vg_sales.csv", function(data) {
+        // Set the margins
+        var margin = { top: 20, right: 50, bottom: 50, left: 50 };
+        var width = 600 - margin.left - margin.right;
+        var height = 600 - margin.top - margin.bottom;
+
         // Create the scale for x-axis
         var x = d3.scaleLinear()
             .domain([2010, 2020])
-            .range([0, 490]);
+            .range([0, width]);
 
         // Create the scale for y-axis
         var y = d3.scaleLinear()
             .domain([0, 42])
-            .range([490, 0]);
+            .range([height, 0]);
 
         // Create the axis for x-axis
         var xAxis = d3.axisBottom(x);
@@ -28,8 +33,12 @@
         // Create the axis for y-axis
         var yAxis = d3.axisLeft(y);
 
-        // Select the SVG element
-        var svg = d3.select("svg");
+        // Select the SVG element with margins
+        var svg = d3.select("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
         // Draw the circles for each data point
         svg.selectAll("circle")
@@ -43,12 +52,11 @@
 
         // Add the x-axis
         svg.append("g")
-            .attr("transform", "translate(0," + 490 + ")")
+            .attr("transform", "translate(0," + height + ")")
             .call(xAxis);
 
         // Add the y-axis
         svg.append("g")
-            .attr("transform", "translate(" + 0 + ",0)")
             .call(yAxis);
     });
 </script>

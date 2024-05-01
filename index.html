@@ -83,8 +83,8 @@
       return svg.node();
     }
 
-    // Load data from CSV and create the chart
-    d3.csv("vgsales.csv", function(error, data) {
+    // Load data from JSON and create the chart
+    d3.json("vgsales.json", function(error, data) {
       if (error) throw error;
 
       const chart = Pack(data, {

@@ -17,9 +17,9 @@
         var width = 600 - margin.left - margin.right;
         var height = 600 - margin.top - margin.bottom;
 
-        // Create the scale for x-axis based on NA_Sales
+        // Create the scale for x-axis based on EU_Sales
         var x = d3.scaleLinear()
-            .domain([0, d3.max(data, function(d) { return +d.NA_Sales; })])
+            .domain([0, d3.max(data, function(d) { return +d.EU_Sales; })])
             .range([0, width]);
 
         // Create the scale for y-axis starting at 0
@@ -48,7 +48,7 @@
             .data(data)
             .enter()
             .append("circle")
-            .attr("cx", function(d) { return x(+d.NA_Sales); })
+            .attr("cx", function(d) { return x(+d.EU_Sales); })
             .attr("cy", function(d) { return y(+d.Global_Sales); })
             .attr("r", 5)
             .attr("fill", function(d) { return color(d.Publisher); });
@@ -62,7 +62,7 @@
         svg.append("text")
             .attr("transform", "translate(" + (width / 2) + " ," + (height + margin.top + 20) + ")")
             .style("text-anchor", "middle")
-            .text("NA Sales");
+            .text("EU Sales");
 
         // Add the y-axis
         svg.append("g")

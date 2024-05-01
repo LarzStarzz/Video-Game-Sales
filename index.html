@@ -10,47 +10,37 @@
 <svg width="500" height="500"></svg>
 
 <script>
-    // Parse the CSV data
-    d3.csv("vg_sales.csv", function(data) {
-        // Create the scale for x-axis
-        var x = d3.scaleLinear()
-            .domain([2010, 2020])
-            .range([0, 490]);
+    // Hardcoded data
+    var data = [
+        { x: 10, y: 20 },
+        { x: 30, y: 40 },
+        { x: 50, y: 60 },
+        { x: 70, y: 80 },
+        { x: 90, y: 100 }
+    ];
 
-        // Create the scale for y-axis
-        var y = d3.scaleLinear()
-            .domain([0, 42])
-            .range([490, 0]);
+    // Create the scale for x-axis
+    var x = d3.scaleLinear()
+        .domain([0, 100])
+        .range([0, 490]);
 
-        // Create the axis for x-axis
-        var xAxis = d3.axisBottom(x);
+    // Create the scale for y-axis
+    var y = d3.scaleLinear()
+        .domain([0, 100])
+        .range([490, 0]);
 
-        // Create the axis for y-axis
-        var yAxis = d3.axisLeft(y);
+    // Select the SVG element
+    var svg = d3.select("svg");
 
-        // Select the SVG element
-        var svg = d3.select("svg");
-
-        // Draw the circles for each data point
-        svg.selectAll("circle")
-            .data(data)
-            .enter()
-            .append("circle")
-            .attr("cx", function(d) { return x(d.Year); })
-            .attr("cy", function(d) { return y(d.Global_Sales); })
-            .attr("r", 5)
-            .attr("fill", "steelblue");
-
-        // Add the x-axis
-        svg.append("g")
-            .attr("transform", "translate(0," + 490 + ")")
-            .call(xAxis);
-
-        // Add the y-axis
-        svg.append("g")
-            .attr("transform", "translate(" + 0 + ",0)")
-            .call(yAxis);
-    });
+    // Draw the circles for each data point
+    svg.selectAll("circle")
+        .data(data)
+        .enter()
+        .append("circle")
+        .attr("cx", function(d) { return x(d.x); })
+        .attr("cy", function(d) { return y(d.y); })
+        .attr("r", 5)
+        .attr("fill", "steelblue");
 </script>
 
 </body>

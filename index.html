@@ -67,6 +67,7 @@
             .attr("display", "block");
 
         svg.append("g")
+            .attr("class", "x-axis")
             .attr("transform", "translate(0," + height + ")")
             .call(xAxis);
 
@@ -76,6 +77,7 @@
             .text("EU Sales");
 
         svg.append("g")
+            .attr("class", "y-axis")
             .call(yAxis);
 
         svg.append("text")
@@ -100,9 +102,15 @@
             svg.selectAll("circle")
                 .filter(function(d) { return d.Genre === genre; })
                 .attr("display", display);
-        }
-    });
-</script>
 
-</body>
-</html>
+            var displayedData = data.filter(d => d3.select(`#${d.Genre}`).property("checked"));
+            var xExtent = d3.extent(displayedData, d => +d.EU_Sales);
+            var yExtent = d3.extent(displayedData, d => +d.Global_Sales);
+
+            x.domain([xExtent[0] - 1, xExtent[1] + 1]);
+            y.domain([yExtent[0] - 1, yExtent[1] + 1]);
+
+            svg.select(".x-axis").call(xAxis);
+            svg.select(".y-axis").call(yAxis);
+
+            circles.attr("cx", d => x(+d.EU_Sales)).attr("

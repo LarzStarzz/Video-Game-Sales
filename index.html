@@ -113,4 +113,10 @@
             svg.select(".x-axis").call(xAxis);
             svg.select(".y-axis").call(yAxis);
 
-            circles.attr("cx", d => x(+d.EU_Sales)).attr("
+            circles.attr("cx", d => x(+d.EU_Sales)).attr("cy", d => y(+d.Global_Sales));
+        }
+    });
+</script>
+
+</body>
+</html>

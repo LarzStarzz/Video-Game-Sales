@@ -141,7 +141,7 @@
             .on("mouseover", function(d) {
                 d3.select("#tooltip")
                     .style("display", "block")
-                    .html(`<strong>${d.Name}</strong> - $d.Platform}`)
+                    .html(`<strong>${d.Name}</strong> - ${d.Platform}`)
                     .style("left", (d3.event.pageX + 10) + "px")
                     .style("top", (d3.event.pageY - 20) + "px")
             })

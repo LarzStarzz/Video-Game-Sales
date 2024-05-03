@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -99,6 +100,10 @@
             // Update x and y domain based on visible data
             var xDomain = d3.extent(visibleData, function(d) { return +d.NA_Sales; });
             var yDomain = d3.extent(visibleData, function(d) { return +d.Global_Sales; });
+
+                // Ensure the domain starts at 0
+            xDomain[0] = Math.min(0, xDomain[0]);
+            yDomain[0] = Math.min(0, yDomain[0]);
         
             x.domain(xDomain).nice();
             y.domain(yDomain).nice();

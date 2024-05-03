@@ -50,22 +50,6 @@
             background: linear-gradient(to bottom, "#0f2027", "#2c5364");
             color: #000000;
         }  
-        .legend {
-          position: absolute;
-          top: 50px; /* Adjust the distance from the top as needed */
-          right: 20px; /* Adjust the distance from the right as needed */
-        }
-        
-        .legend div {
-          margin-bottom: 5px;
-        }
-        
-        .legend-color {
-          width: 10px;
-          height: 10px;
-          display: inline-block;
-          margin-right: 5px;
-        }
         .content {
           margin-top: 20vh;
         }
@@ -224,20 +208,6 @@
             .on("mouseout", function() {
                 d3.select("#tooltip").style("display", "none");
             });
-
-        var legend = d3.select(".legend")
-          .selectAll("div")
-          .data(data)
-          .enter()
-          .append("div")
-          .style("color", function(d) {
-            // Set the color based on the data
-            return d.color;
-          })
-          .text(function(d) {
-            // Set the text based on the data
-            return d.text;
-          });
     
         svg.append("g")
             .attr("class", "x-axis")

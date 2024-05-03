@@ -111,6 +111,15 @@
             svg.select(".y-axis")
                 .transition()
                 .call(yAxis);
+        
+            // Transition circles to new positions
+            svg.selectAll("circle")
+                .filter(function(d) {
+                    return selectedGenres.includes(d.Genre);
+                })
+                .transition()
+                .attr("cx", function(d) { return x(+d.NA_Sales); })
+                .attr("cy", function(d) { return y(+d.Global_Sales); });
         }
     
         var circles = svg.selectAll("circle")

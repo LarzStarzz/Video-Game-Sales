@@ -101,7 +101,22 @@
 <div id="tooltip"></div>
 <div class="doc-link">
   <a href="Documentation.html">Go to Documentation Page</a> <!-- Link to the documentation page -->
-</div>div>
+</div>
+
+<div class="legend">
+    <div>
+      <span class="legend-color" style="background-color: #1f77b4;"></span>
+      <span>Legend Item 1</span>
+    </div>
+    <div>
+      <span class="legend-color" style="background-color: #ff7f0e;"></span>
+      <span>Legend Item 2</span>
+    </div>
+    <div>
+      <span class="legend-color" style="background-color: #2ca02c;"></span>
+      <span>Legend Item 3</span>
+    </div>
+</div>
 
 <script>
     d3.csv("vg_sales.csv", function(data) {
@@ -209,6 +224,20 @@
             .on("mouseout", function() {
                 d3.select("#tooltip").style("display", "none");
             });
+
+        var legend = d3.select(".legend")
+          .selectAll("div")
+          .data(data)
+          .enter()
+          .append("div")
+          .style("color", function(d) {
+            // Set the color based on the data
+            return d.color;
+          })
+          .text(function(d) {
+            // Set the text based on the data
+            return d.text;
+          });
     
         svg.append("g")
             .attr("class", "x-axis")

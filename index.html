@@ -41,7 +41,7 @@
             justify-content: center;
             align-items: center;
             height: 100px;
-            background-color: #ffffff; /* Example background color, replace with your desired color */
+            background-color: #ffffff;
             color: #000000;
         }
         body {
@@ -67,10 +67,7 @@
           text-decoration: none;
           border-radius: 5px;
         }
-
-
         
-
     </style>
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
@@ -90,7 +87,7 @@
   <div id="tooltip"></div>
 
   <div class="doc-link">
-    <a href="Documentation.html">Go to Documentation Page</a> <!-- Link to the documentation page -->
+    <a href="Documentation.html">Go to Documentation Page</a>
   </div>
 
 <script>
@@ -136,7 +133,6 @@
             .property("checked", true)
             .on("change", updateDataPoints);
 
-        // Define colors and corresponding labels
         var legendData = [
           { color: '#fb3b64', label: 'Sports' },
           { color: '#4f2351', label: 'Platform' },
@@ -152,7 +148,6 @@
           { color: '#ff0000', label: 'Strategy' }
         ];
         
-        // Create an SVG element for the legend
         var legend = d3.select('body').append('svg')
           .attr('class', 'legend')
           .attr('width', legendWidth)
@@ -160,8 +155,7 @@
           .style('position', 'absolute')
           .style('top', topMargin + 'px')
           .style('right', rightMargin + 'px');
-        
-        // Append rectangles with colors
+
         legend.selectAll('rect')
           .data(legendData)
           .enter()
@@ -172,7 +166,7 @@
           .attr('height', 10)
           .style('fill', function(d) { return d.color; });
         
-        // Append text elements with labels
+
         legend.selectAll('text')
           .data(legendData)
           .enter()
@@ -192,23 +186,22 @@
                     return selectedGenres.includes(d.Genre) ? "block" : "none";
                 });
         
-            // Filter data based on selected genres
             var visibleData = data.filter(function(d) {
                 return selectedGenres.includes(d.Genre);
             });
         
-            // Update x and y domain based on visible data
+        
             var xDomain = d3.extent(visibleData, function(d) { return +d.NA_Sales; });
             var yDomain = d3.extent(visibleData, function(d) { return +d.Global_Sales; });
 
-                // Ensure the domain starts at 0
+               
             xDomain[0] = Math.min(0, xDomain[0]);
             yDomain[0] = Math.min(0, yDomain[0]);
         
             x.domain(xDomain).nice();
             y.domain(yDomain).nice();
         
-            // Update x and y axis
+    
             svg.select(".x-axis")
                 .transition()
                 .call(xAxis);
@@ -217,7 +210,7 @@
                 .transition()
                 .call(yAxis);
         
-            // Transition circles to new positions
+    
             svg.selectAll("circle")
                 .filter(function(d) {
                     return selectedGenres.includes(d.Genre);
@@ -234,7 +227,7 @@
             .attr("cx", function(d) { return x(+d.NA_Sales); })
             .attr("cy", function(d) { return y(+d.Global_Sales); })
             .attr("r", 5)
-            .attr("fill", function(d) { return color(d.Genre); }) // Use the color scale to assign colors based on genre
+            .attr("fill", function(d) { return color(d.Genre); }) 
             .on("mouseover", function(d) {
                 d3.select("#tooltip")
                     .style("display", "block")

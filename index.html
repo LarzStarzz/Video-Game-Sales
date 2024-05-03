@@ -59,7 +59,7 @@
         var xAxis = d3.axisBottom(x);
         var yAxis = d3.axisLeft(y);
     
-        var color = d3.scaleOrdinal(d3.schemeCategory10);
+        var color = d3.scaleSequential(d3.interpolatePlasma);
     
         var svg = d3.select("svg")
             .attr("width", width + margin.left + margin.right)

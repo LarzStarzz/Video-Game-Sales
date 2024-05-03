@@ -59,7 +59,14 @@
         var xAxis = d3.axisBottom(x);
         var yAxis = d3.axisLeft(y);
     
-        var color = d3.scaleOrdinal(d3.schemeCategory10);
+        var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        var customColors = ["#170030", "#55005e", "#860055", "#b02d2d", "#d27f00", "#f9d313", "#001871", "#00537d", "#009881", "#00c955", "#00e129", "#7cff00"]; 
+
+        checkboxes.forEach(function(checkbox, index) {
+            if (index < customColors.length) {
+                checkbox.style.backgroundColor = customColors[index];
+            }
+        });
 
         
     

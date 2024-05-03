@@ -58,18 +58,23 @@
     
         var xAxis = d3.axisBottom(x);
         var yAxis = d3.axisLeft(y);
-    
-        var checkboxes = document.querySelectorAll('input[type="checkbox"]');
-        var customColors = ["#170030", "#55005e", "#860055", "#b02d2d", "#d27f00", "#f9d313", "#001871", "#00537d", "#009881", "#00c955", "#00e129", "#7cff00"]; 
 
-        checkboxes.forEach(function(checkbox, index) {
-            if (index < customColors.length) {
-                checkbox.style.backgroundColor = customColors[index];
-            }
-        });
+        Sports
+Platform
+Racing
+Role-Playing
+Puzzle
+Misc
+Shooter
+Simulation
+Action
+Fighting
+Adventure
+Strategy
+        var color = d3.scaleOrdinal()
+            .domain(["Sports", "Platform", "Racing", "Role-Playing", "Puzzle", "Misc", "Shooter", "Simulation", "Action", "Fighting", "Adventure", "Strategy"]) 
+            .range(["#170030", "#55005e", "#860055", "#b02d2d", "#d27f00", "#f9d313", "#001871", "#00537d", "#009881", "#00c955", "#00e129", "#7cff00"]); 
 
-        
-    
         var svg = d3.select("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
@@ -137,23 +142,19 @@
                 .attr("cy", function(d) { return y(+d.Global_Sales); });
         }
     
-        var circles = svg.selectAll("circle")
+           var circles = svg.selectAll("circle")
             .data(data)
             .enter()
             .append("circle")
             .attr("cx", function(d) { return x(+d.NA_Sales); })
             .attr("cy", function(d) { return y(+d.Global_Sales); })
             .attr("r", 5)
-            .attr("fill", function(d) { return color(d.Genre); })
+            .attr("fill", function(d) { return color(d.Genre); }) // Use the color scale to assign colors based on genre
             .on("mouseover", function(d) {
-                d3.select("#tooltip")
-                    .style("display", "block")
-                    .html(`<strong>${d.Name}</strong> - ${d.Platform}`)
-                    .style("left", (d3.event.pageX + 10) + "px")
-                    .style("top", (d3.event.pageY - 20) + "px");
+                // Tooltip code
             })
             .on("mouseout", function() {
-                d3.select("#tooltip").style("display", "none");
+                // Tooltip hide code
             });
     
         svg.append("g")

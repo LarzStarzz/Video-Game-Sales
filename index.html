@@ -31,11 +31,6 @@
             display: block;
             margin-bottom: 5px;
         }
-        #checkbox1 label {
-          color: #ff0000; /* Change the color of the first checkbox label text to red */
-          display: block;
-          margin-bottom: 5px;
-    }
 
         svg {
             margin: 20 auto;
@@ -55,6 +50,9 @@
             background: linear-gradient(to bottom, "#0f2027", "#2c5364");
             color: #000000;
         }  
+       .image {
+          float: right;
+        } 
         .content {
           margin-top: 20vh;
         }
@@ -72,6 +70,7 @@
           border-radius: 5px;
         }
 
+
         
 
     </style>
@@ -79,34 +78,24 @@
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 </head>
 <body>
-<div class="container">
+  <div class="container">
     <div id="checkboxes"></div>
     <svg width="800" height="600"></svg>
-</div>
-<div id="tooltip"></div>
-<div class="container">
-<div id="checkboxes"></div>
-    <svg width="800" height="600"></svg>
-</div>
-<div id="tooltip"></div>
-<div class="doc-link">
-  <a href="Documentation.html">Go to Documentation Page</a> <!-- Link to the documentation page -->
-</div>
+  </div>
+  <div id="tooltip"></div>
 
-<div class="legend">
-    <div>
-      <span class="legend-color" style="background-color: #1f77b4;"></span>
-      <span>Legend Item 1</span>
+  <div class="container">
+    <div id="checkboxes"></div>
+    <svg width="800" height="600"></svg>
+    <div class="image">
+      <img src="https://i.stack.imgur.com/cdCSj.jpg" alt="Description of the image">
     </div>
-    <div>
-      <span class="legend-color" style="background-color: #ff7f0e;"></span>
-      <span>Legend Item 2</span>
-    </div>
-    <div>
-      <span class="legend-color" style="background-color: #2ca02c;"></span>
-      <span>Legend Item 3</span>
-    </div>
-</div>
+  </div>
+  <div id="tooltip"></div>
+
+  <div class="doc-link">
+    <a href="Documentation.html">Go to Documentation Page</a> <!-- Link to the documentation page -->
+  </div>
 
 <script>
     d3.csv("vg_sales.csv", function(data) {

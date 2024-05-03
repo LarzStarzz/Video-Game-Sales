@@ -139,10 +139,14 @@
             .attr("r", 5)
             .attr("fill", function(d) { return color(d.Genre); }) // Use the color scale to assign colors based on genre
             .on("mouseover", function(d) {
-                // Tooltip code
+                d3.select("#tooltip")
+                    .style("display", "block")
+                    .html(`<strong>${d.Name}</strong> - $d.Platform}`)
+                    .style("left", (d3.event.pageX + 10) + "px")
+                    .style("top", (d3.event.pageY - 20) + "px")
             })
             .on("mouseout", function() {
-                // Tooltip hide code
+                d3.select("#tooltip").style("display", "none");
             });
     
         svg.append("g")

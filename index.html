@@ -50,9 +50,7 @@
             background: linear-gradient(to bottom, "#0f2027", "#2c5364");
             color: #000000;
         }  
-       .image {
-          float: right;
-        } 
+
         .content {
           margin-top: 20vh;
         }
@@ -87,9 +85,7 @@
   <div class="container">
     <div id="checkboxes"></div>
     <svg width="800" height="600"></svg>
-    <div class="image">
-      <img src="https://i.stack.imgur.com/cdCSj.jpg" alt="Description of the image">
-    </div>
+
   </div>
   <div id="tooltip"></div>
 
@@ -139,6 +135,40 @@
             .attr("value", function(d) { return d.key; })
             .property("checked", true)
             .on("change", updateDataPoints);
+
+        // Define colors and corresponding labels
+        var legendData = [
+          { color: 'red', label: 'Apples' },
+          { color: 'blue', label: 'Bananas' },
+          { color: 'green', label: 'Grapes' }
+        ];
+        
+        // Create an SVG element for the legend
+        var legend = d3.select('body').append('svg')
+          .attr('class', 'legend')
+          .attr('width', 100)
+          .attr('height', 100);
+        
+        // Append rectangles with colors
+        legend.selectAll('rect')
+          .data(legendData)
+          .enter()
+          .append('rect')
+          .attr('x', 10)
+          .attr('y', function(d, i) { return 10 + i * 20; })
+          .attr('width', 10)
+          .attr('height', 10)
+          .style('fill', function(d) { return d.color; });
+        
+        // Append text elements with labels
+        legend.selectAll('text')
+          .data(legendData)
+          .enter()
+          .append('text')
+          .attr('x', 25)
+          .attr('y', function(d, i) { return 20 + i * 20; })
+          .text(function(d) { return d.label; })
+          .attr('alignment-baseline', 'middle');
     
         function updateDataPoints() {
             var selectedGenres = checkboxes.filter(function() {

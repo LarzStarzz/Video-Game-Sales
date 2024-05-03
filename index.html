@@ -147,7 +147,9 @@
         var legend = d3.select('body').append('svg')
           .attr('class', 'legend')
           .attr('width', 100)
-          .attr('height', 100);
+          .attr('height', 100)
+          .style('position', 'absolute')
+          .style('left', '600px'); // Adjust the left position as needed
         
         // Append rectangles with colors
         legend.selectAll('rect')

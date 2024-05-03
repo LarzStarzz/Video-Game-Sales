@@ -82,14 +82,35 @@
             .on("change", updateDataPoints);
     
         function updateDataPoints() {
-            var selectedGenres = checkboxes.filter(function(d) {
+            var selectedGenres = checkboxes.filter(function() {
                 return this.checked;
             }).data().map(function(d) { return d.key; });
-    
+        
             svg.selectAll("circle")
                 .style("display", function(d) {
                     return selectedGenres.includes(d.Genre) ? "block" : "none";
                 });
+        
+            // Filter data based on selected genres
+            var visibleData = data.filter(function(d) {
+                return selectedGenres.includes(d.Genre);
+            });
+        
+            // Update x and y domain based on visible data
+            var xDomain = d3.extent(visibleData, function(d) { return +d.NA_Sales; });
+            var yDomain = d3.extent(visibleData, function(d) { return +d.Global_Sales; });
+        
+            x.domain(xDomain).nice();
+            y.domain(yDomain).nice();
+        
+            // Update x and y axis
+            svg.select(".x-axis")
+                .transition()
+                .call(xAxis);
+        
+            svg.select(".y-axis")
+                .transition()
+                .call(yAxis);
         }
     
         var circles = svg.selectAll("circle")

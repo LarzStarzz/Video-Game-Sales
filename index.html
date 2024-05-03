@@ -31,9 +31,7 @@
             margin: 20 auto;
             display: block;
         }
-        body {
-            border: 10px solid red;
-        }
+
     </style>
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
@@ -44,6 +42,11 @@
     <svg width="800" height="600"></svg>
 </div>
 <div id="tooltip"></div>
+
+<header>
+    <h1 class = "centered-header"> Centered Header</h1>
+</header>
+
 
 <script>
     d3.csv("vg_sales.csv", function(data) {

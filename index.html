@@ -28,11 +28,12 @@
         }
 
         svg {
-            margin: 0 auto;
+            margin: 20 auto;
             display: block;
         }
     </style>
     <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 </head>
 <body>
 <div class="container">
@@ -58,7 +59,9 @@
         var xAxis = d3.axisBottom(x);
         var yAxis = d3.axisLeft(y);
     
-        var color = d3.scaleOrdinal(d3.schemeCategory10);
+        var myColor = d3.scaleSequential().domain([1,10])
+          .interpolator(d3.interpolateViridis);
+        svg.selectAll(".secondrow").data(data).enter().append("circle").attr("cx", function(d,i){return 30 + i*60}).attr("cy", 250).attr("r", 19).attr("fill", function(d){return myColor(d) })
     
         var svg = d3.select("svg")
             .attr("width", width + margin.left + margin.right)

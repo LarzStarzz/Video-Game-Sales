@@ -138,9 +138,18 @@
 
         // Define colors and corresponding labels
         var legendData = [
-          { color: 'red', label: 'Apples' },
-          { color: 'blue', label: 'Bananas' },
-          { color: 'green', label: 'Grapes' }
+          { color: '#fb3b64', label: 'Sports' },
+          { color: '#4f2351', label: 'Platform' },
+          { color: '#fcc539', label: 'Racing' },
+          { color: '#f8401b', label: 'Role-Playing' },
+          { color: '#52b281', label: 'Puzzle' },
+          { color: '#2f8735', label: 'Misc' },
+          { color: '#2abbd0', label: 'Shooter' },
+          { color: '#315dcd', label: 'Simulation' },
+          { color: '#d59ff4', label: 'Action' },
+          { color: '#7c3ce1', label: 'Fighting' },
+          { color: '#ffa855', label: 'Adventure' },
+          { color: '#ff0000', label: 'Strategy' }
         ];
         
         // Create an SVG element for the legend
@@ -149,7 +158,7 @@
           .attr('width', 100)
           .attr('height', 100)
           .style('position', 'absolute')
-          .style('left', '600px'); // Adjust the left position as needed
+          .style('left', '600px');
         
         // Append rectangles with colors
         legend.selectAll('rect')

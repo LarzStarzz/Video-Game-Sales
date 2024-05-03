@@ -147,6 +147,11 @@
           { color: '#ffa855', label: 'Adventure' },
           { color: '#ff0000', label: 'Strategy' }
         ];
+
+        var legendWidth = 100; // Width of the legend
+        var legendHeight = 100; // Height of the legend
+        var topMargin = 20; // Margin from the top
+        var rightMargin = 20; // Margin from the right
         
         var legend = d3.select('body').append('svg')
           .attr('class', 'legend')

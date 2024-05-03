@@ -59,8 +59,7 @@
         var xAxis = d3.axisBottom(x);
         var yAxis = d3.axisLeft(y);
     
-        var color = d3.scaleSequential(d3.interpolatePlasma);
-            color.domain([0, genres.length]);
+        var color = d3.scaleOrdinal(d3.schemeCategory10);
     
         var svg = d3.select("svg")
             .attr("width", width + margin.left + margin.right)
@@ -136,7 +135,7 @@
             .attr("cx", function(d) { return x(+d.NA_Sales); })
             .attr("cy", function(d) { return y(+d.Global_Sales); })
             .attr("r", 5)
-            .attr("fill", function(d) { return color(genres.indexOf(d.Genre)); })
+            .attr("fill", function(d) { return color(d.Genre); })
             .on("mouseover", function(d) {
                 d3.select("#tooltip")
                     .style("display", "block")

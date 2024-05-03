@@ -155,10 +155,11 @@
         // Create an SVG element for the legend
         var legend = d3.select('body').append('svg')
           .attr('class', 'legend')
-          .attr('width', 100)
-          .attr('height', 100)
+          .attr('width', legendWidth)
+          .attr('height', legendHeight)
           .style('position', 'absolute')
-          .style('left', '600px');
+          .style('top', topMargin + 'px')
+          .style('right', rightMargin + 'px');
         
         // Append rectangles with colors
         legend.selectAll('rect')

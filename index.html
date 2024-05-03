@@ -60,6 +60,8 @@
         var yAxis = d3.axisLeft(y);
     
         var color = d3.scaleSequential(d3.interpolatePlasma);
+            color.domain([0, genres.length]);
+        
     
         var svg = d3.select("svg")
             .attr("width", width + margin.left + margin.right)
